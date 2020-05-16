@@ -6,6 +6,7 @@ import flixel.FlxState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import game1.Game1State;
 import lastgame.LastState;
 
 class IntroState extends FlxState
@@ -188,6 +189,6 @@ class IntroState extends FlxState
 
 	private function switchState()
 	{
-		FlxG.switchState(new LastState());
+		FlxG.switchState(new Game1State());
 	}
 }
