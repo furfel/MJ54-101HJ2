@@ -12,12 +12,16 @@ class Player extends FlxSprite
 {
 	private var parent:Game1State = null;
 
+	public static final GRAVITY = 60.0;
+
+	public static final SPEED = 1700.0;
+
 	public function new(parent:Game1State)
 	{
-		super(72, 100);
+		super(72, FlxG.height - 240);
 		makeGraphic(128, 128, FlxColor.BLUE);
-		screenCenter(Y);
 		this.parent = parent;
+		maxVelocity.set(90, 340);
 	}
 
 	/**
@@ -26,27 +30,32 @@ class Player extends FlxSprite
 	**/
 	private var jumpTween:LinearMotion = null;
 
-	public static final JUMPHEIGHT = 300.0;
+	public static final JUMP_TIME_MAX = 0.5;
 
-	private function jump()
+	private var jumpTime = -1.0;
+
+	private function jump(elapsed:Float)
 	{
-		if (jumpTween != null && !jumpTween.finished)
-			return;
-		jumpTween = FlxTween.linearMotion(this, this.x, this.y, this.x, this.y - JUMPHEIGHT, 1.0, true, {
-			ease: FlxEase.cubeIn,
-			type: ONESHOT,
-			onComplete: _ ->
+		if (FlxG.keys.anyJustPressed([W]))
+		{
+			if (velocity.y == 0)
 			{
-				jumpTween = FlxTween.linearMotion(this, this.x, this.y, this.x, this.y + JUMPHEIGHT, 1.0, true, {
-					ease: FlxEase.cubeOut,
-					type: ONESHOT,
-					onComplete: _ ->
-					{
-						jumpTween = null;
-					}
-				});
+				jumpTime = 0.0;
 			}
-		});
+		}
+
+		if (FlxG.keys.anyPressed([W]) && jumpTime >= 0.0)
+		{
+			jumpTime += elapsed;
+			if (jumpTime > JUMP_TIME_MAX)
+			{
+				jumpTime = -1.0;
+			}
+			else if (jumpTime > 0)
+			{
+				velocity.y = -0.6 * maxVelocity.y;
+			}
+		}
 	}
 
 	/**
@@ -58,7 +67,7 @@ class Player extends FlxSprite
 
 	public static final LOITER_Y = 60;
 
-	private var loiterAmnt = 7;
+	private var loiterAmnt = 1;
 
 	private function loiter()
 	{
@@ -69,17 +78,73 @@ class Player extends FlxSprite
 		}
 	}
 
+	public function addLoiter()
+	{
+		loiterAmnt++;
+	}
+
 	private function move() {}
 
 	private function checkKeys()
 	{
-		if (FlxG.keys.anyJustPressed([SPACE]))
+		if (FlxG.keys.anyJustPressed([SPACE])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.lastActive.anyJustPressed([A, B, X, Y])))
 			loiter();
+
+		velocity.x = 0;
+
+		var left = FlxG.keys.anyPressed([LEFT, A])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.analog.value.LEFT_STICK_X < -0.1);
+		var right = FlxG.keys.anyPressed([RIGHT, D])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.analog.value.LEFT_STICK_X > 0.1);
+
+		if (!(left && right))
+		{
+			if (left)
+			{
+				velocity.x = -SPEED;
+				flipX = true;
+			}
+
+			if (right)
+			{
+				velocity.x = SPEED;
+				flipX = false;
+			}
+
+			if (velocity.x == 0)
+				animation.play("stand");
+			else
+				animation.play("walk");
+		}
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		checkKeys();
+
+		if (x < -this.width / 2)
+		{
+			x = -this.width / 2;
+		}
+
+		if (x > 0.9 * FlxG.width - this.width)
+			x = 0.9 * FlxG.width - this.width;
+	}
+
+	override function kill()
+	{
+		alive = false;
+		exists = true;
+		angularVelocity = 920;
+		FlxTween.tween(this, {alpha: 0}, 1.0, {
+			ease: FlxEase.cubeOut,
+			type: ONESHOT,
+			onComplete: _ ->
+			{
+				parent.gameover();
+			}
+		});
 	}
 }

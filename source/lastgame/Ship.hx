@@ -67,10 +67,14 @@ class Ship extends FlxSprite
 
 	private function checkKeys()
 	{
-		var up = FlxG.keys.anyPressed([W, UP]) || FlxG.gamepads.lastActive.analog.value.LEFT_STICK_Y < -0.1;
-		var down = FlxG.keys.anyPressed([S, DOWN]) || FlxG.gamepads.lastActive.analog.value.LEFT_STICK_Y > 0.1;
-		var left = FlxG.keys.anyPressed([A, LEFT]) || FlxG.gamepads.lastActive.analog.value.LEFT_STICK_X < -0.1;
-		var right = FlxG.keys.anyPressed([D, RIGHT]) || FlxG.gamepads.lastActive.analog.value.LEFT_STICK_X > 0.1;
+		var up = FlxG.keys.anyPressed([W, UP])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.analog.value.LEFT_STICK_Y < -0.1);
+		var down = FlxG.keys.anyPressed([S, DOWN])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.analog.value.LEFT_STICK_Y > 0.1);
+		var left = FlxG.keys.anyPressed([A, LEFT])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.analog.value.LEFT_STICK_X < -0.1);
+		var right = FlxG.keys.anyPressed([D, RIGHT])
+			|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.analog.value.LEFT_STICK_X > 0.1);
 
 		var _x = 0.0, _y = 0.0;
 

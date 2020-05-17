@@ -20,6 +20,8 @@ class LastState extends FlxState
 	{
 		super.create();
 
+		bgColor = FlxColor.BLACK;
+
 		createStars();
 		createLazers();
 

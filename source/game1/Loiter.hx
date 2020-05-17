@@ -18,7 +18,8 @@ class Loiter extends FlxSprite
 	{
 		super(-1000, -1000);
 
-		makeGraphic(32, 32, FlxColor.YELLOW);
+		loadGraphic("assets/images/first/trash.png", true, 48, 48);
+		animation.add("a", [0, 1, 2, 3, 4], 13);
 
 		alive = false;
 		exists = false;
@@ -33,6 +34,9 @@ class Loiter extends FlxSprite
 		super.reset(X, Y);
 		alive = true;
 		exists = true;
+
+		animation.play("a");
+		FlxG.sound.play("assets/sounds/trash.ogg");
 
 		tween = FlxTween.linearMotion(this, this.x, this.y, this.x, this.y + FALLDOWN, 1.0, {
 			ease: FlxEase.bounceOut,

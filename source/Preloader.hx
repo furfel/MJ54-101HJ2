@@ -17,6 +17,9 @@ private class PreloaderBitmap3 extends BitmapData {}
 @:keep @:bitmap("assets/preloader4.jpg")
 private class PreloaderBitmap4 extends BitmapData {}
 
+@:keep @:bitmap("assets/preloader1.jpg")
+private class PreloaderWarning extends BitmapData {}
+
 class Preloader extends FlxBasePreloader
 {
 	public function new()
@@ -29,19 +32,32 @@ class Preloader extends FlxBasePreloader
 	var bmpFrame:Int = 0;
 	var bitmaps:Array<Bitmap> = new Array<Bitmap>();
 	var bitmapClasses:Array<Class<BitmapData>> = [PreloaderBitmap2, PreloaderBitmap3, PreloaderBitmap4];
+	var warning:Bitmap = null;
 	var current:Bitmap = null;
 
 	private var startTime:Float = 0.0;
+	private var startTime0:Float = 0;
 	private var endTime:Float = 1.0;
 	private var elapsed:Float = 0.0;
 
-	public static final MIN_TIME = 5;
+	public static final MIN_TIME = 8;
 
 	override function create()
 	{
 		_buffer = new Sprite();
 		addChild(_buffer);
-		_buffer.addChild(new Bitmap(new BitmapData(800, 600, 0x000000)));
+		_buffer.addChild(new Bitmap(new BitmapData(1280, 720, 0x000000)));
+
+		warning = createBitmap(PreloaderWarning, (b) ->
+		{
+			var aspect = b.width / b.height;
+			b.width = Std.int(0.75 * Lib.current.stage.stageWidth);
+			b.height = b.width / aspect;
+			b.x = Lib.current.stage.stageWidth / 2 - b.width / 2;
+			b.y = Lib.current.stage.stageHeight - b.height - 100;
+		});
+		warning.smoothing = true;
+		warning.alpha = 0;
 
 		for (b in bitmapClasses)
 		{
@@ -58,10 +74,11 @@ class Preloader extends FlxBasePreloader
 			bitmaps.push(_bitmap);
 		}
 
-		startTime = Date.now().getTime();
+		startTime0 = Date.now().getTime();
+		startTime = Date.now().getTime() + 2000;
 		endTime = MIN_TIME * 1000;
 		current = bitmaps[0];
-		_buffer.addChild(current);
+		_buffer.addChild(warning);
 
 		super.create();
 	}
@@ -91,6 +108,21 @@ class Preloader extends FlxBasePreloader
 	override function onEnterFrame(E:Event)
 	{
 		super.onEnterFrame(E);
+
+		if (Date.now().getTime() < startTime)
+		{
+			elapsed = Date.now().getTime() - startTime0;
+			var p = (Date.now().getTime() - startTime) / (startTime - startTime0);
+			if (p > 0.9)
+			{
+				warning.alpha = Math.max(0, 1.0 - (p - 0.9) * 10);
+			}
+			else if (p <= 0.1)
+			{
+				warning.alpha = Math.min(1, p * 10);
+			}
+			return;
+		}
 
 		elapsed = Date.now().getTime() - startTime;
 		if (bitmaps == null)

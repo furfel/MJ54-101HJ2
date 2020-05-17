@@ -29,7 +29,7 @@ class BearStampede extends FlxTypedGroup<FlxSprite>
 		}
 	}
 
-	public function startStampede()
+	public function startStampede(x:Float)
 	{
 		for (b in bears)
 			if (b.alive)
@@ -43,6 +43,9 @@ class BearStampede extends FlxTypedGroup<FlxSprite>
 			if (maxBears <= 0)
 				break;
 		}
+
+		FlxG.sound.play("assets/sounds/bears.ogg");
+		FlxG.sound.play("assets/sounds/bears1.ogg");
 
 		FlxG.camera.shake(0.07, 6.0, FlxAxes.Y);
 	}
@@ -59,5 +62,18 @@ class BearStampede extends FlxTypedGroup<FlxSprite>
 
 		if (_d != null)
 			_d.reset(X, Y);
+	}
+
+	public function collideWithIceCreamStand(e:EvilIceCreamStand):Bool
+	{
+		var coll = false;
+		FlxG.overlap(this, e, (b, e) ->
+		{
+			if ((e is EvilIceCreamStand) && (b is Bear))
+			{
+				cast(e, EvilIceCreamStand).getHit();
+			}
+		});
+		return coll;
 	}
 }
