@@ -72,8 +72,8 @@ class EvilIceCreamStand extends FlxSprite
 			return;
 		else
 		{
-			this.health -= 25.0;
-			cooldown = 2.5;
+			this.health -= 19.0;
+			cooldown = 3.5;
 			tweenAlpha();
 		}
 	}

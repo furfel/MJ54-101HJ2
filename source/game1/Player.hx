@@ -18,8 +18,12 @@ class Player extends FlxSprite
 
 	public function new(parent:Game1State)
 	{
-		super(72, FlxG.height - 240);
-		makeGraphic(128, 128, FlxColor.BLUE);
+		super(72, FlxG.height - 230.0);
+		loadGraphic("assets/images/first/player.png", true, 108, 144);
+		animation.add("stand", [
+			0, 2, 4, 0, 2, 4, 0, 2, 4, 0, 2, 4, 5, 1, 3, 1, 5, 0, 2, 4, 0, 2, 4, 0, 2, 4, 0, 2, 4, 0, 2, 4
+		], 13);
+		animation.add("walk", [6, 7, 8, 9], 13);
 		this.parent = parent;
 		maxVelocity.set(90, 340);
 	}
@@ -82,6 +86,9 @@ class Player extends FlxSprite
 	{
 		loiterAmnt++;
 	}
+
+	public function hasLoiter():Bool
+		return loiterAmnt > 0;
 
 	private function move() {}
 

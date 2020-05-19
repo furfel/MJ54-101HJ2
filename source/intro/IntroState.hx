@@ -104,6 +104,8 @@ class IntroState extends FlxState
 	var youknowwhat_group = new FlxTypedGroup<FlxSprite>();
 	var handdrawn_group = new FlxTypedGroup<FlxSprite>();
 
+	var createTimer:FlxTimer;
+
 	override function create()
 	{
 		super.create();
@@ -111,9 +113,13 @@ class IntroState extends FlxState
 		youknowwhat_create();
 		handdrawn_create();
 
-		FlxG.camera.fade(FlxColor.BLACK, 1.0, true, () ->
+		createTimer = new FlxTimer().start(4.0, _ ->
 		{
-			handdrawn_stage();
+			this.add(youknowwhat_group);
+			FlxG.camera.fade(FlxColor.BLACK, 1.4, true, () ->
+			{
+				handdrawn_stage();
+			});
 		});
 	}
 
@@ -128,8 +134,6 @@ class IntroState extends FlxState
 			sp.animation.play("wobble");
 			youknowwhat_group.add(sp);
 		}
-
-		this.add(youknowwhat_group);
 	}
 
 	private function handdrawn_create()
@@ -143,9 +147,11 @@ class IntroState extends FlxState
 		}
 	}
 
+	private var handdrawnTimer:FlxTimer;
+
 	private function handdrawn_stage()
 	{
-		new FlxTimer().start(2.3, _ ->
+		handdrawnTimer = new FlxTimer().start(2.8, _ ->
 		{
 			FlxG.camera.fade(FlxColor.BLACK, 0.7, false, () ->
 			{
@@ -160,9 +166,11 @@ class IntroState extends FlxState
 		});
 	}
 
+	private var postTimer:FlxTimer;
+
 	private function post_stage()
 	{
-		new FlxTimer().start(3.7, _ ->
+		postTimer = new FlxTimer().start(3.7, _ ->
 		{
 			FlxG.camera.fade(FlxColor.WHITE, 0.7, false, () ->
 			{
@@ -190,5 +198,32 @@ class IntroState extends FlxState
 	private function switchState()
 	{
 		FlxG.switchState(new Episode1State());
+	}
+
+	var skip = false;
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		if (!skip)
+			if (FlxG.keys.anyJustPressed([SPACE])
+				|| (FlxG.gamepads.numActiveGamepads > 0 && FlxG.gamepads.firstActive.anyJustPressed([A, B, X, Y])))
+			{
+				skip = true;
+
+				if (handdrawnTimer != null)
+					handdrawnTimer.cancel();
+
+				if (postTimer != null)
+					postTimer.cancel();
+
+				if (createTimer != null)
+					createTimer.cancel();
+
+				FlxG.camera.fade(FlxColor.WHITE, 0.7, false, () ->
+				{
+					switchState();
+				});
+			}
 	}
 }

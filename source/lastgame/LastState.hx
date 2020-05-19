@@ -23,6 +23,7 @@ class LastState extends FlxState
 		bgColor = FlxColor.BLACK;
 
 		createStars();
+		add(new Rocket());
 		createLazers();
 
 		add(tire = new EvilSpaceTire(this));
@@ -64,7 +65,7 @@ class LastState extends FlxState
 		if (lz == null)
 			return;
 		lz.reset(X, Y);
-		tirehealthbar.setHealth(FlxG.random.float(10.0, 100.0), 100.0);
+		FlxG.sound.play("assets/sounds/shoot.ogg");
 	}
 
 	override function destroy()
@@ -114,6 +115,8 @@ class LastState extends FlxState
 		tirehealthlabel.visible = true;
 	}
 
+	var oversoundPlayed = false;
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -127,7 +130,14 @@ class LastState extends FlxState
 		});
 
 		if (tire.alive && player.overlapTire(tire))
+		{
+			if (!oversoundPlayed)
+			{
+				FlxG.sound.play("assets/sounds/over.ogg");
+				oversoundPlayed = true;
+			}
 			restart();
+		}
 
 		if (!outro && !tire.alive)
 			do_outro();
@@ -150,7 +160,7 @@ class LastState extends FlxState
 		outro = true;
 		FlxG.camera.fade(FlxColor.BLACK, 0.4, false, () ->
 		{
-			FlxG.switchState(new outro.OutroState());
+			FlxG.switchState(new episode3.Episode3Intro());
 		});
 	}
 }

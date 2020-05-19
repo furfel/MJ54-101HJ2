@@ -132,6 +132,7 @@ class EvilSpaceTire extends FlxSprite
 		health -= 10;
 		cooldown = 1.2;
 		tweenAlpha();
+		FlxG.sound.play("assets/sounds/tirehit.ogg");
 	}
 
 	override function update(elapsed:Float)

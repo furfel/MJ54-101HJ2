@@ -29,18 +29,14 @@ class Preloader extends FlxBasePreloader
 
 	var _buffer:Sprite;
 
-	var bmpFrame:Int = 0;
-	var bitmaps:Array<Bitmap> = new Array<Bitmap>();
-	var bitmapClasses:Array<Class<BitmapData>> = [PreloaderBitmap2, PreloaderBitmap3, PreloaderBitmap4];
 	var warning:Bitmap = null;
-	var current:Bitmap = null;
 
 	private var startTime:Float = 0.0;
 	private var startTime0:Float = 0;
 	private var endTime:Float = 1.0;
 	private var elapsed:Float = 0.0;
 
-	public static final MIN_TIME = 8;
+	public static final MIN_TIME = 12;
 
 	override function create()
 	{
@@ -59,25 +55,8 @@ class Preloader extends FlxBasePreloader
 		warning.smoothing = true;
 		warning.alpha = 0;
 
-		for (b in bitmapClasses)
-		{
-			var _bitmap = createBitmap(b, (bbitmap) ->
-			{
-				var aspect = bbitmap.width / bbitmap.height;
-				bbitmap.width = Lib.current.stage.stageWidth;
-				bbitmap.height = bbitmap.width / aspect;
-				bbitmap.x = 0;
-				bbitmap.y = Lib.current.stage.stageHeight / 2 - bbitmap.height / 2;
-			});
-			_bitmap.smoothing = true;
-			_bitmap.alpha = 0;
-			bitmaps.push(_bitmap);
-		}
-
-		startTime0 = Date.now().getTime();
-		startTime = Date.now().getTime() + 2000;
+		startTime = Date.now().getTime();
 		endTime = MIN_TIME * 1000;
-		current = bitmaps[0];
 		_buffer.addChild(warning);
 
 		super.create();
@@ -85,15 +64,9 @@ class Preloader extends FlxBasePreloader
 
 	override function destroy()
 	{
-		if (current != null)
-			_buffer.removeChild(current);
-		for (b in bitmaps)
-		{
-			_buffer.removeChild(b);
-			removeChild(b);
-			bitmaps.remove(b);
-		}
-		bitmaps = null;
+		if (warning != null)
+			_buffer.removeChild(warning);
+		warning = null;
 		if (_buffer != null)
 			removeChild(_buffer);
 		_buffer = null;
@@ -109,46 +82,20 @@ class Preloader extends FlxBasePreloader
 	{
 		super.onEnterFrame(E);
 
-		if (Date.now().getTime() < startTime)
-		{
-			elapsed = Date.now().getTime() - startTime0;
-			var p = (Date.now().getTime() - startTime) / (startTime - startTime0);
-			if (p > 0.9)
-			{
-				warning.alpha = Math.max(0, 1.0 - (p - 0.9) * 10);
-			}
-			else if (p <= 0.1)
-			{
-				warning.alpha = Math.min(1, p * 10);
-			}
-			return;
-		}
-
-		elapsed = Date.now().getTime() - startTime;
-		if (bitmaps == null)
-			return;
-		bmpFrame = Std.int(elapsed / 150) % bitmaps.length;
-
 		var percentTime = calculatePercentOfTime();
 
-		_buffer.removeChild(current);
-		if (bitmaps == null)
+		if (warning == null)
 			return;
-		current = bitmaps[bmpFrame];
-		if (percentTime > 0.9 && current != null)
-		{
-			setAllAlpha(Math.max(0, 1.0 - (percentTime - 0.9) * 10));
-		}
-		else if (percentTime <= 0.1 && current != null)
-		{
-			setAllAlpha(Math.min(1, percentTime * 10));
-		}
-		_buffer.addChild(current);
-	}
 
-	public inline function setAllAlpha(a:Float)
-		for (b in bitmaps)
-			b.alpha = a;
+		if (percentTime > 0.9 && warning != null)
+		{
+			warning.alpha = Math.max(0, 1.0 - (percentTime - 0.9) * 10);
+		}
+		else if (percentTime <= 0.1 && warning != null)
+		{
+			warning.alpha = Math.min(1, percentTime * 10);
+		}
+	}
 
 	override function update(Percent:Float)
 	{

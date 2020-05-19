@@ -11,6 +11,7 @@ import lastgame.Episode2State;
 
 class Game1State extends FlxState
 {
+	private var sign:FlxSprite;
 	private var loiter:Loiter;
 	private var bearStampede:BearStampede;
 	private var player:Player;
@@ -22,6 +23,8 @@ class Game1State extends FlxState
 
 	private var standHealthBar:StandHealthBar;
 
+	private var loiterIndicator:FlxSprite;
+
 	override function create()
 	{
 		super.create();
@@ -29,6 +32,7 @@ class Game1State extends FlxState
 		this.bgColor = FlxColor.WHITE;
 
 		add(backcones);
+		create_sign();
 		add(evilIceCreamStand = new EvilIceCreamStand(FlxG.width - 320, FlxG.height / 2 - 256.0, this));
 		create_cones();
 		add(bearStampede = new BearStampede());
@@ -36,6 +40,10 @@ class Game1State extends FlxState
 		add(loiter = new Loiter(this));
 
 		add(standHealthBar = new StandHealthBar());
+
+		add(loiterIndicator = new FlxSprite(32, 32).loadGraphic("assets/images/indicator.png", true, 144, 144));
+		loiterIndicator.animation.add("no", [0], 1);
+		loiterIndicator.animation.add("yes", [1], 1);
 
 		FlxG.camera.fade(FlxColor.WHITE, 0.6, true, throwFirstCone);
 	}
@@ -49,6 +57,14 @@ class Game1State extends FlxState
 	public function stampede()
 	{
 		bearStampede.startStampede(player.x);
+	}
+
+	private function create_sign()
+	{
+		sign = new FlxSprite(FlxG.width / 2, FlxG.height / 2 - 100).loadGraphic("assets/images/first/loitersign.png", true, 300, Std.int(498 / 3));
+		sign.animation.add("a", [0, 1, 2], 13);
+		sign.animation.play("a");
+		add(sign);
 	}
 
 	private function create_cones()
@@ -107,12 +123,25 @@ class Game1State extends FlxState
 			{
 				cast(i, IcePop).kill();
 				cast(p, Player).addLoiter();
+				FlxG.sound.play("assets/sounds/icepop.ogg");
 			}
 		});
+
+		if (player.hasLoiter())
+			loiterIndicator.animation.play("yes");
+		else
+			loiterIndicator.animation.play("no");
 	}
+
+	var overSoundPlayed = false;
 
 	public function gameover()
 	{
+		if (!overSoundPlayed)
+		{
+			FlxG.sound.play("assets/sounds/over.ogg");
+			overSoundPlayed = true;
+		}
 		FlxG.camera.fade(FlxColor.WHITE, 0.5, false, () -> FlxG.switchState(new Game1State()), true);
 	}
 

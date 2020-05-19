@@ -80,7 +80,7 @@ class IceCreamCone extends FlxSprite
 		if (this.isBackcone)
 		{
 			kill();
-			if (FlxG.random.float() < 0.09)
+			if (FlxG.random.float() < 0.20)
 			{
 				var i = parent.getIcePop();
 				if (i != null)
